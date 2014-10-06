@@ -1,0 +1,22 @@
+#expand-comparison-window {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  width: auto;
+}
+
+#comparison-window {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  background: white;
+  padding: 10px;
+  width: 300px;
+  border: solid 1px rgb(220, 224, 224);
+}
+
+#comparison-window ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
