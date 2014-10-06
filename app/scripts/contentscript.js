@@ -1,4 +1,6 @@
 'use strict';
+var airbnbScrapper = require('airbnb-scrapper');
+var $ = require('jquery');
 /**
  * Finds the first element for which a predicate function returns a truthy value
  * for in an array.
@@ -18,16 +20,33 @@ function find(arr, fn) {
 }
 
 /**
+ * Iterates a function `fn` over a collection `coll`.
+ *
+ * @param {{Array|Object}} coll
+ * @param {Function} fn
+ */
+
+function each(coll, fn) {
+  var keys = Object.keys(coll);
+  for(var i = 0, len = keys.length; i < len; i++) {
+    var key = keys[i];
+    fn(coll[key], key);
+  }
+}
+
+/**
  * Initializes the add to comparison DOM element, with the necessary event
  * handlers attached.
  *
+ * @param {Element} comparisonList The `ul` tag containing compared elements
  * @return {Element}
  */
 
-function initAddToComparisonButton() {
+function initAddToComparisonButton(comparisonList) {
   function handleClick(evt) {
     evt.stopPropagation();
-    console.log('Compare all things!');
+    var currentPosting = airbnbScrapper.extractInfo($);
+    comparisonList.appendChild(initComparisonListItem(currentPosting));
   }
 
   var addToComparison = document.getElementById('add-to-comparison');
@@ -45,12 +64,35 @@ function initAddToComparisonButton() {
 }
 
 /**
- * Initializes the comparison window DOM element and returns it.
+ * Initializes a new comparison list item node based on an information object.
  *
+ * @param {Object} info
  * @return {Element}
  */
 
-function initComparisonWindow() {
+function initComparisonListItem(info) {
+  var li = document.createElement('li');
+  var header = document.createElement('h3');
+
+  header.innerHTML = info.title;
+  li.appendChild(header);
+
+  each(info, function(value, key) {
+    var text = document.createTextNode(key + ': ' + value);
+    li.appendChild(text);
+  });
+
+  return li;
+}
+
+/**
+ * Initializes the comparison window DOM element and returns it.
+ *
+ * @param {Element} comparisonList
+ * @return {Element}
+ */
+
+function initComparisonWindow(comparisonList) {
   var comparisonWindow = document.getElementById('chrome-airbnb-compare');
   if(!comparisonWindow) {
     comparisonWindow = document.createElement('div');
@@ -58,18 +100,17 @@ function initComparisonWindow() {
 
   comparisonWindow.id = 'comparison-window';
   comparisonWindow.style.display = 'none';
-
-  // TODO - REMOVE STUBBED ENTRIES FROM THE COMPARISON WINDOW:
-  comparisonWindow.innerHTML =
-    '<ul>'+
-    '<li>San Juan, near Beach, Ashford Ave</li>'+
-    '<li>Bla bla bla bla</li>'+
-    '<li>Something that should be here</li>'+
-    '<li>Stuff I need to unstub</li>'+
-    '</ul>';
+  comparisonWindow.appendChild(comparisonList);
 
   return comparisonWindow;
 }
+
+/**
+ * Initializes a expand/colapse comparison list button and returns it.
+ *
+ * @param {Element} comparisonWindow
+ * @return {Element}
+ */
 
 function initExpandComparisonWindowButton(comparisonWindow) {
   function handleClick() {
@@ -97,14 +138,15 @@ function initExpandComparisonWindowButton(comparisonWindow) {
 
 function initAirbnbCompare() {
   // Get or create the comparison window:
-  var comparisonWindow = initComparisonWindow();
+  var comparisonList = document.createElement('ul');
+  var comparisonWindow = initComparisonWindow(comparisonList);
   var expandComparisonWindow = initExpandComparisonWindowButton(comparisonWindow);
   document.body.appendChild(comparisonWindow);
   document.body.appendChild(expandComparisonWindow);
 
   // Get or create the "add to comparison button":
   var bookItDiv = document.getElementById('book_it');
-  var addToComparison = initAddToComparisonButton();
+  var addToComparison = initAddToComparisonButton(comparisonWindow);
   var addToWishListWrapper = find(bookItDiv.children, function(el) {
     return el.className === 'wishlist-wrapper';
   });
