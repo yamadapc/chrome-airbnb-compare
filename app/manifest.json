@@ -17,7 +17,7 @@
         "styles/main.css"
       ],
       "js": [
-        "scripts/contentscript.js"
+        "build/scripts/contentscript.js"
       ],
       "run_at": "document_end",
       "all_frames": false

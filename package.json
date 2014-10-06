@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "echo \"I don't know how to do that yet!\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.8",
+    "gulp-browserify": "^0.5.0"
+  }
+}
