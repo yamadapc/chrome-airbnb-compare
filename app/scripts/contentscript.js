@@ -35,6 +35,34 @@ function each(coll, fn) {
 }
 
 /**
+ * Loads a comparison list from local storage, parses it and returns it. If no
+ * `airbnb-comparison-list` key exists in local storage, will return an empty
+ * list.
+ *
+ * @return {Array}
+ */
+
+function loadComparison() {
+  var clist = localStorage.getItem('airbnb-comparison-list');
+
+  if(clist) {
+    return JSON.parse(clist);
+  }
+
+  return [];
+}
+
+/**
+ * Saves the current state of the comparison list to local storage.
+ *
+ * @param {Array} clist
+ */
+
+function saveComparison(clist) {
+  localStorage.setItem('airbnb-comparison-list', JSON.stringify(clist));
+}
+
+/**
  * Gets or creates an element `elType` with id `id`.
  *
  * @param {String} elType
@@ -61,11 +89,14 @@ function getOrCreateElement(elType, id) {
  * @return {Element}
  */
 
-function initAddToComparisonButton(comparisonList) {
+function initAddToComparisonButton(comparisonList, storedItems) {
   function handleClick(evt) {
     evt.stopPropagation();
     var currentPosting = airbnbScrapper.extractInfo($);
     comparisonList.appendChild(initComparisonListItem(currentPosting));
+
+    storedItems.push(currentPosting);
+    saveComparison(storedItems);
   }
 
   var addToComparison = getOrCreateElement('div', 'add-to-comparison');
@@ -123,10 +154,15 @@ function initComparisonListItem(info) {
  * Initializes the comparison window DOM element and returns it.
  *
  * @param {Element} comparisonList
+ * @param {Array} storedItems
  * @return {Element}
  */
 
-function initComparisonWindow(comparisonList) {
+function initComparisonWindow(comparisonList, storedItems) {
+  each(storedItems, function(item) {
+    comparisonList.appendChild(initComparisonListItem(item));
+  });
+
   var comparisonWindow = getOrCreateElement('div', 'comparison-window');
 
   comparisonWindow.style.display = 'none';
@@ -168,16 +204,19 @@ function initExpandComparisonWindowButton(comparisonWindow) {
  */
 
 function initAirbnbCompare() {
+  // Get comparison items saved to the local storage:
+  var storedItems = loadComparison();
+
   // Get or create the comparison window:
   var comparisonList = document.createElement('ul');
-  var comparisonWindow = initComparisonWindow(comparisonList);
+  var comparisonWindow = initComparisonWindow(comparisonList, storedItems);
   var expandComparisonWindow = initExpandComparisonWindowButton(comparisonWindow);
   document.body.appendChild(comparisonWindow);
   document.body.appendChild(expandComparisonWindow);
 
   // Get or create the "add to comparison button":
   var bookItDiv = document.getElementById('book_it');
-  var addToComparison = initAddToComparisonButton(comparisonList);
+  var addToComparison = initAddToComparisonButton(comparisonList, storedItems);
   var addToWishListWrapper = find(bookItDiv.children, function(el) {
     return el.className === 'wishlist-wrapper';
   });
@@ -185,4 +224,6 @@ function initAirbnbCompare() {
   addToWishListWrapper.appendChild(addToComparison);
   return addToComparison;
 }
+
 initAirbnbCompare();
+
