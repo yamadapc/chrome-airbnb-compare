@@ -35,6 +35,25 @@ function each(coll, fn) {
 }
 
 /**
+ * Gets or creates an element `elType` with id `id`.
+ *
+ * @param {String} elType
+ * @param {String} id
+ * @return {Element}
+ */
+
+function getOrCreateElement(elType, id) {
+  var el = document.getElementById(id);
+
+  if(!el) {
+    el = document.createElement(elType);
+    el.id = id;
+  }
+
+  return el;
+}
+
+/**
  * Initializes the add to comparison DOM element, with the necessary event
  * handlers attached.
  *
@@ -49,12 +68,7 @@ function initAddToComparisonButton(comparisonList) {
     comparisonList.appendChild(initComparisonListItem(currentPosting));
   }
 
-  var addToComparison = document.getElementById('add-to-comparison');
-  if(!addToComparison) {
-    addToComparison = document.createElement('div');
-  }
-
-  addToComparison.id = 'add-to-comparison';
+  var addToComparison = getOrCreateElement('div', 'add-to-comparison');
   addToComparison.className = 'btn btn-block btn-large';
   addToComparison.innerHTML = 'Add to comparison';
   addToComparison.addEventListener('click', handleClick, true);
@@ -71,15 +85,35 @@ function initAddToComparisonButton(comparisonList) {
  */
 
 function initComparisonListItem(info) {
+  // <li>
+  //   <div class="comparison-item-wrapper">
+  //     <h3>{{title}}</h3>
+  //     <table>...</table>
+  //   </div>
+  // </li>
   var li = document.createElement('li');
+  var innerWrapper = document.createElement('div');
   var header = document.createElement('h3');
+  var table = document.createElement('table');
 
+  li.appendChild(innerWrapper);
+  innerWrapper.className = 'comparison-item-wrapper';
+
+  innerWrapper.appendChild(header);
   header.innerHTML = info.title;
-  li.appendChild(header);
 
+  innerWrapper.appendChild(table);
   each(info, function(value, key) {
-    var text = document.createTextNode(key + ': ' + value);
-    li.appendChild(text);
+    var tr = document.createElement('tr');
+    var keyTd = document.createElement('td');
+    var valueTd = document.createElement('td');
+
+    keyTd.innerHTML = key;
+    valueTd.innerHTML = value;
+
+    tr.appendChild(keyTd);
+    tr.appendChild(valueTd);
+    table.appendChild(tr);
   });
 
   return li;
@@ -93,15 +127,17 @@ function initComparisonListItem(info) {
  */
 
 function initComparisonWindow(comparisonList) {
-  var comparisonWindow = document.getElementById('chrome-airbnb-compare');
-  if(!comparisonWindow) {
-    comparisonWindow = document.createElement('div');
-  }
+  var comparisonWindow = getOrCreateElement('div', 'comparison-window');
 
-  comparisonWindow.id = 'comparison-window';
   comparisonWindow.style.display = 'none';
   comparisonWindow.appendChild(comparisonList);
 
+  var explanationText = document.createElement('p');
+  explanationText.className = 'comparison-tip';
+  explanationText.innerHTML =
+    'Add items to the comparison by clicking "Add to Comparison" at the right';
+
+  comparisonWindow.appendChild(explanationText);
   return comparisonWindow;
 }
 
@@ -119,12 +155,7 @@ function initExpandComparisonWindowButton(comparisonWindow) {
                                                                 'none';
   }
 
-  var expandComparisonWindow = document.getElementById('expand-comparison-window');
-  if(!expandComparisonWindow) {
-    expandComparisonWindow = document.createElement('div');
-  }
-
-  expandComparisonWindow.id = 'expand-comparison-window';
+  var expandComparisonWindow = getOrCreateElement('div', 'expand-comparison-window');
   expandComparisonWindow.className = 'btn btn-block btn-large';
   expandComparisonWindow.innerHTML = 'See compared postings';
   expandComparisonWindow.addEventListener('click', handleClick);
@@ -146,7 +177,7 @@ function initAirbnbCompare() {
 
   // Get or create the "add to comparison button":
   var bookItDiv = document.getElementById('book_it');
-  var addToComparison = initAddToComparisonButton(comparisonWindow);
+  var addToComparison = initAddToComparisonButton(comparisonList);
   var addToWishListWrapper = find(bookItDiv.children, function(el) {
     return el.className === 'wishlist-wrapper';
   });

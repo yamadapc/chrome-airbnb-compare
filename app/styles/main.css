@@ -11,7 +11,7 @@
   left: 0;
   background: white;
   padding: 10px;
-  width: 300px;
+  width: auto;
   border: solid 1px rgb(220, 224, 224);
 }
 
@@ -19,4 +19,13 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+#comparison-window ul li td {
+  border: solid 1px #eee;
+  color: #000;
+}
+
+#comparison-window .comparison-tip {
+  color: #ccc;
 }
