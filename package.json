@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "airbnb-scrapper": "^1.1.1",
-    "jquery": "^2.1.1"
+    "jquery": "^2.2.2"
   }
 }
